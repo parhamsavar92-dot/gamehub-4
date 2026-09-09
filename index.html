@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GameHub — اخبار گیم</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&family=Lalezar&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="theme-color" content="#0f1220">
+<meta name="color-scheme" content="dark light">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<!-- Welcome / entry experience -->
+<div id="welcomeGate" class="welcome-gate">
+  <div class="welcome-card">
+    <div class="welcome-logo">👑</div>
+    <h1 class="welcome-title" data-i18n="welcomeTitle">به گیم‌هاب خوش اومدی</h1>
+    <p class="welcome-sub" data-i18n="welcomeSub">اخبار گیم، شورتس، اکسپلور و بازی — همه‌ش اینجاست</p>
+    <div class="welcome-streak" id="welcomeStreak"></div>
+    <button type="button" id="welcomeEnterBtn" class="btn-accent welcome-enter" data-i18n="welcomeEnter">ورود به سایت 🚀</button>
+  </div>
+</div>
+
+
+<!-- Broadcast banner (hidden by default) -->
+<div id="broadcast" class="broadcast hidden">
+  <div class="broadcast-inner">
+    <span class="broadcast-badge">👑 <b id="broadcastAuthor">Parham savar</b> <svg class="tick" viewBox="0 0 24 24"><path d="M12 2l2.4 2.2 3.2-.6 1 3.1 3.1 1-.6 3.2L23 14l-2.2 2.4.6 3.2-3.1 1-1 3.1-3.2-.6L12 26l-2.4-2.2-3.2.6-1-3.1-3.1-1 .6-3.2L1 14l2.2-2.4-.6-3.2 3.1-1 1-3.1 3.2.6z" fill="#3897f0"/><path d="M9.5 12.5l2 2 4-4.5" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    <p id="broadcastText"></p>
+    <button id="broadcastClose" class="btn-ghost">متوجه شدم</button>
+  </div>
+</div>
+
+<!-- Top bar -->
+<header class="topbar">
+  <div class="brand">
+    <span class="crown">♛</span>
+    <div class="brand-text">
+      <span class="brand-owner">parham-savar owner site</span>
+      <span class="brand-name">GameHub</span>
+    </div>
+  </div>
+
+  <nav class="mainnav" id="mainNav">
+    <button class="navlink active" data-view="home">خانه</button>
+    <button class="navlink" data-view="explore">اکسپلور</button>
+    <button class="navlink" data-view="shorts">شورتس</button>
+    <button class="navlink" data-view="games">بازی‌ها</button>
+    <button class="navlink" data-view="chat">چت کاربران</button>
+    <button class="navlink" data-view="roblox">روبلاکس</button>
+    <button class="navlink" data-view="anime">انیمه</button>
+    <button class="navlink" data-view="ai">هوش مصنوعی</button>
+    <button class="navlink" data-view="profile">پروفایل</button>
+    <button class="navlink" data-view="settings">تنظیمات</button>
+    <button class="navlink" data-view="aboutus">درباره ما</button>
+    <button class="navlink" data-view="admin">پنل ادمین</button>
+  </nav>
+
+  <div class="topbar-right">
+    <button id="siteSearchBtn" class="notif-bell" title="جستجوی سایت">🔍</button>
+    <button id="notifBell" class="notif-bell" title="اعلان‌ها">🔔<span id="notifBadge" class="notif-badge hidden">0</span></button>
+    <select id="langSelect" class="lang-select" title="زبان"></select>
+    <button id="menuToggle" class="menu-toggle" aria-label="باز کردن منو" aria-expanded="false">☰</button>
+  </div>
+</header>
+
+<!-- Live update indicator -->
+<div id="eventBanner" class="event-banner hidden"></div>
+<div class="clock-strip">
+  <span class="clock-icon">🕐</span>
+  <span id="siteClock">--:--:--</span>
+  <span class="clock-label">ساعت به وقت شما</span>
+  <span class="net-sep">|</span>
+  <span id="netInfo" class="net-info">در حال سنجش اتصال…</span>
+  <span id="updateCountdownDisplay" class="net-info hidden"></span>
+</div>
+<div class="live-strip">
+  <span class="dot"></span>
+  <span>به‌روزرسانی خودکار — آخرین بار: <b id="lastUpdate">--:--:--</b></span>
+</div>
+
+<main id="app">
+
+  <!-- HOME VIEW -->
+  <section id="view-home" class="view active">
+    <div class="home-layout">
+      <div class="feed-col">
+        <div class="feed-toolbar">
+          <input id="searchInput" type="text" placeholder="جستجوی خبر..." data-i18n-placeholder="searchNews">
+          <div class="tagfilter" id="tagFilter">
+            <button class="tag active" data-tag="all">همه</button>
+            <button class="tag" data-tag="رصد خودکار">خودکار</button>
+            <button class="tag" data-tag="RPG">RPG</button>
+            <button class="tag" data-tag="اکشن">اکشن</button>
+            <button class="tag" data-tag="تحریریه">تحریریه</button>
+          </div>
+        </div>
+        <div id="trendingStrip" class="trending-strip" aria-label="ترندها"></div>
+        <div id="newsFeed" class="news-feed"></div>
+      </div>
+
+      <aside class="side-col">
+        <div id="pollWidget" class="side-card hidden"></div>
+        <div class="side-card">
+          <h3>رصد زنده</h3>
+          <p class="dim">منابع: زومجی، GameSpot، Polygon، PC Gamer، Eurogamer</p>
+          <button id="scanNowBtn" class="btn-accent full">رصد همین حالا</button>
+          <p class="tiny dim">هر رصد فقط از فیدهای عمومیِ این منابع تیتر می‌گیرد، نه کل فضای مجازی.</p>
+        </div>
+        <div class="side-card">
+          <h3>محبوب‌ترین</h3>
+          <div id="popularList"></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ARTICLE VIEW -->
+  <section id="view-article" class="view">
+    <button class="btn-ghost back-btn" data-back="home">← <span data-i18n="back">بازگشت</span></button>
+    <article id="articleBody" class="article-body"></article>
+    <div class="comments-block">
+      <h3>دیدگاه‌ها (<span id="commentCount">0</span>)</h3>
+      <div id="commentAuthGate" class="auth-gate">
+        <p>برای گذاشتن دیدگاه باید ابتدا ثبت‌نام کنی.</p>
+        <button class="btn-accent" data-open-auth="signup" data-i18n="signupLogin">ثبت‌نام / ورود</button>
+      </div>
+      <form id="commentForm" class="comment-form hidden">
+        <textarea id="commentInput" placeholder="دیدگاهت را بنویس..." rows="3"></textarea>
+        <button type="submit" class="btn-accent">ارسال دیدگاه</button>
+      </form>
+      <div id="commentList" class="comment-list"></div>
+    </div>
+  </section>
+
+  <!-- ROBLOX VIEW -->
+  <section id="view-roblox" class="view">
+    <h2 class="view-title" data-i18n="roblox">روبلاکس</h2>
+    <div class="roblox-grid" id="robloxGrid"></div>
+    <div class="side-card">
+      <h3>خبرهای زنده روبلاکس</h3>
+      <button id="robloxScanBtn" class="btn-accent full">رصد اخبار روبلاکس</button>
+      <div id="robloxNews" class="news-feed"></div>
+    </div>
+  </section>
+
+  <!-- ANIME VIEW -->
+  <section id="view-anime" class="view">
+    <h2 class="view-title" data-i18n="anime">انیمه</h2>
+    <div class="roblox-grid" id="animeGrid"></div>
+    <div class="side-card">
+      <h3>خبرهای زنده انیمه</h3>
+      <button id="animeScanBtn" class="btn-accent full">رصد اخبار انیمه</button>
+      <div id="animeNews" class="news-feed"></div>
+    </div>
+  </section>
+
+  <!-- GAMES VIEW -->
+  <section id="view-games" class="view">
+    <h2 class="view-title" data-i18n="games">سالن بازی</h2>
+    <div class="support-status" id="lbLiveStatus" style="margin:0 0 12px;"><span class="dot"></span><span>لیدربورد همه بازی‌ها به‌صورت زنده و ابری بین همه بازیکن‌ها همگام است 🏆</span></div>
+    <div class="game-picker" id="gamePicker">
+      <button class="game-card" data-game="snake"><span class="gicon">🐍</span>مار طلایی پرو<small class="glevel">⭐⭐⭐</small><small class="gcat">آرکید</small></button>
+      <button class="game-card" data-game="memory"><span class="gicon">🧠</span>حافظه تاج<small class="glevel">⭐⭐</small><small class="gcat">فکری</small></button>
+      <button class="game-card" data-game="tictactoe"><span class="gicon">⭕</span>دوز<small class="glevel">⭐</small><small class="gcat">فکری</small></button>
+      <button class="game-card" data-game="rps"><span class="gicon">✂️</span>سنگ‌کاغذقیچی<small class="glevel">⭐</small><small class="gcat">شانسی</small></button>
+      <button class="game-card" data-game="reaction"><span class="gicon">⚡</span>سرعت واکنش<small class="glevel">⭐⭐</small><small class="gcat">ریفلکس</small></button>
+      <button class="game-card" data-game="guess"><span class="gicon">🔢</span>حدس عدد<small class="glevel">⭐</small><small class="gcat">فکری</small></button>
+      <button class="game-card" data-game="g2048"><span class="gicon">🧩</span>۲۰۴۸<small class="glevel">⭐⭐⭐</small><small class="gcat">پازل</small></button>
+      <button class="game-card" data-game="pong"><span class="gicon">🏓</span>پونگ<small class="glevel">⭐⭐</small><small class="gcat">آرکید</small></button>
+      <button class="game-card" data-game="quiz"><span class="gicon">🎯</span>کوییز گیم<small class="glevel">⭐⭐</small><small class="gcat">اطلاعات</small></button>
+      <button class="game-card" data-game="mines"><span class="gicon">💣</span>مین‌روب<small class="glevel">⭐⭐⭐⭐</small><small class="gcat">فکری</small></button>
+      <button class="game-card" data-game="breakout"><span class="gicon">🧱</span>آجرشکن<small class="glevel">⭐⭐⭐</small><small class="gcat">آرکید</small></button>
+      <button class="game-card" data-game="clicker"><span class="gicon">👆</span>کلیکر طلایی<small class="glevel">⭐</small><small class="gcat">ایدل</small></button>
+      <button class="game-card" data-game="simon"><span class="gicon">🎵</span>سایمون سیز<small class="glevel">⭐⭐⭐</small><small class="gcat">حافظه</small></button>
+      <button class="game-card" data-game="whack"><span class="gicon">🔨</span>موش‌کوب<small class="glevel">⭐⭐</small><small class="gcat">ریفلکس</small></button>
+      <button class="game-card" data-game="flappy"><span class="gicon">🐦</span>پرنده پرنده<small class="glevel">⭐⭐⭐⭐</small><small class="gcat">آرکید</small></button>
+      <button class="game-card" data-game="scramble"><span class="gicon">🔤</span>کلمه قاطی‌پاطی<small class="glevel">⭐⭐</small><small class="gcat">کلمات</small></button>
+      <button class="game-card" data-game="hangman"><span class="gicon">🎪</span>دار و مار کلمه<small class="glevel">⭐⭐</small><small class="gcat">کلمات</small></button>
+      <button class="game-card" data-game="mathblitz"><span class="gicon">➗</span>ریاضی رعدآسا<small class="glevel">⭐⭐⭐</small><small class="gcat">ذهنی</small></button>
+      <button class="game-card" data-game="colormatch"><span class="gicon">🎨</span>رنگ‌شناس<small class="glevel">⭐⭐⭐</small><small class="gcat">ریفلکس</small></button>
+      <button class="game-card" data-game="slide15"><span class="gicon">🔳</span>پازل کشویی<small class="glevel">⭐⭐⭐⭐</small><small class="gcat">پازل</small></button>
+      <button class="game-card" data-game="connect4"><span class="gicon">🔴</span>چهار‌تایی<small class="glevel">⭐⭐⭐</small><small class="gcat">استراتژی</small></button>
+      <button class="game-card" data-game="typing"><span class="gicon">⌨️</span>سرعت تایپ<small class="glevel">⭐⭐</small><small class="gcat">مهارتی</small></button>
+      <button class="game-card" data-game="stacker"><span class="gicon">🏗️</span>برج‌ساز<small class="glevel">⭐⭐⭐⭐</small><small class="gcat">مهارتی</small></button>
+      <button class="game-card" data-game="dodger"><span class="gicon">☄️</span>فرار از شهاب<small class="glevel">⭐⭐⭐</small><small class="gcat">آرکید</small></button>
+      <button class="game-card" data-game="maze"><span class="gicon">🌀</span>هزارتو<small class="glevel">⭐⭐⭐</small><small class="gcat">فکری</small></button>
+      <button class="game-card" data-game="schulte"><span class="gicon">🔟</span>جدول شولته<small class="glevel">⭐⭐⭐</small><small class="gcat">ذهنی</small></button>
+      <button class="game-card" data-game="balloon"><span class="gicon">🎈</span>بادکنک‌ترکون<small class="glevel">⭐⭐</small><small class="gcat">ریفلکس</small></button>
+      <button class="game-card" data-game="aim"><span class="gicon">🎯</span>نشانه‌گیر<small class="glevel">⭐⭐⭐</small><small class="gcat">مهارتی</small></button>
+      <button class="game-card" data-game="flood"><span class="gicon">💧</span>سیل رنگی<small class="glevel">⭐⭐⭐⭐</small><small class="gcat">پازل</small></button>
+      <button class="game-card" data-game="catch"><span class="gicon">🧺</span>سبد میوه‌چین<small class="glevel">⭐⭐</small><small class="gcat">آرکید</small></button>
+    </div>
+    <div id="gameStage" class="game-stage"></div>
+    <div class="side-card" style="margin-top:18px;">
+      <h3>🏆 لیدربورد زنده — برترین‌های کل سایت</h3>
+      <p class="dim tiny">این جدول، برترین امتیازهای هر بازی را بین همهٔ بازیکن‌ها به‌صورت آنی نشان می‌دهد.</p>
+      <div id="globalLeaderboard" class="global-lb-grid"></div>
+    </div>
+  </section>
+
+  <!-- AI (public) VIEW -->
+  <section id="view-ai" class="view">
+    <h2 class="view-title" data-i18n="ai">هوش مصنوعی گیم‌هاب</h2>
+    <div id="chatWindow" class="chat-window"></div>
+    <form id="aiForm" class="chat-form">
+      <button type="button" id="aiAttachBtn" class="btn-ghost" title="پیوست عکس/فایل">📎</button>
+      <input type="file" id="aiAttachInput" accept="image/*,.pdf,.txt" class="hidden">
+      <select id="aiProvider" class="ai-provider" title="مدل هوش مصنوعی"><option value="openai">ChatGPT / OpenAI</option><option value="anthropic">Claude</option><option value="gemini">Gemini</option><option value="xai">Grok</option><option value="deepseek">DeepSeek</option></select>
+      <input id="aiInput" type="text" placeholder="از هوش مصنوعی بپرس... مثلاً «آخرین خبرها»">
+      <button type="submit" class="btn-accent">ارسال</button>
+    </form>
+  </section>
+
+  <!-- ADMIN VIEW -->
+  <section id="view-admin" class="view">
+    <div id="adminLoginBox" class="admin-login">
+      <h2 class="view-title">ورود پنل ادمین</h2>
+      <p class="dim">این پنل فقط برای مالک و ادمین‌هایی است که مالک اضافه کرده.</p>
+      <form id="adminLoginForm">
+        <input id="adminUser" type="text" placeholder="نام کاربری" autocomplete="username">
+        <input id="adminPass" type="password" placeholder="رمز عبور" autocomplete="current-password">
+        <button type="submit" class="btn-accent full">ورود</button>
+        <p id="adminLoginMsg" class="msg"></p>
+      </form>
+      <p class="tiny dim security-note">امنیت این نسخه: رمز هش می‌شود، بعد از ۵ بار ورود غلط پنل ۱ دقیقه قفل می‌شود، نقش مالک قابل حذف نیست. این یک دموی فرانت‌اند است — امنیت کامل سمت سرور نیاز به بک‌اند واقعی دارد.</p>
+    </div>
+
+    <div id="adminPanel" class="admin-panel hidden">
+      <div class="admin-header">
+        <h2 class="view-title">پنل ادمین — <span id="adminWho"></span></h2>
+        <button id="adminLogoutBtn" class="btn-ghost">خروج</button>
+      </div>
+
+      <div class="admin-tabs">
+        <button class="atab active" data-atab="dashboard">داشبورد مالک 👑</button>
+        <button class="atab" data-atab="publish">نوشتن خبر</button>
+        <button class="atab" data-atab="manage">مدیریت اخبار</button>
+        <button class="atab" data-atab="members">اعضا و آمار</button>
+        <button class="atab" data-atab="messages">پیام‌رسانی</button>
+        <button class="atab" data-atab="bans">بن‌شده‌ها</button>
+        <button class="atab" data-atab="reports">گزارش‌ها <span id="reportBadge" class="tab-badge hidden">0</span></button>
+        <button class="atab" data-atab="schedule">زمان‌بندی خبر</button>
+        <button class="atab" data-atab="analytics">آمار پیشرفته</button>
+        <button class="atab" data-atab="log">لاگ فعالیت</button>
+        <button class="atab" data-atab="backup">پشتیبان‌گیری</button>
+        <button class="atab" data-atab="theme">سفارشی‌سازی ظاهر</button>
+        <button class="atab" data-atab="admins" id="adminsTabBtn">مدیریت ادمین‌ها</button>
+        <button class="atab" data-atab="power">ابزارهای پیشرفته ⚡</button>
+        <button class="atab" data-atab="security">امنیت پیشرفته 🛡️</button>
+        <button class="atab" data-atab="branding">برندینگ 🎨</button>
+        <button class="atab" data-atab="automation">اتوماسیون 🤖</button>
+        <button class="atab" data-atab="gamesmgmt">مدیریت بازی‌ها 🎮</button>
+        <button class="atab" data-atab="robloxmgmt">مدیریت روبلاکس 🎲</button>
+        <button class="atab" data-atab="shortsmgmt">مدیریت شورتس 🎬</button>
+        <button class="atab" data-atab="exploremgmt">مدیریت اکسپلور 🧭</button>
+        <button class="atab" data-atab="invites">کد دعوت 🎟️</button>
+        <button class="atab" data-atab="polls">نظرسنجی 📊</button>
+        <button class="atab" data-atab="bugreports">گزارش باگ <span id="bugBadge" class="tab-badge hidden">0</span></button>
+        <button class="atab" data-atab="ownernotes" id="ownerNotesTabBtn">یادداشت مالک 📝</button>
+        <button class="atab" data-atab="adminroom">اتاق گفتگوی ادمین‌ها 🗣️</button>
+        <button class="atab" data-atab="newssuggest">پیشنهاد خبر کاربران <span id="suggestBadge" class="tab-badge hidden">0</span></button>
+        <button class="atab" data-atab="aboutus">درباره ما ℹ️</button>
+        <button class="atab" data-atab="site">مشخصات سایت</button>
+        <button class="atab" data-atab="ai">اتاق فرمان مالک</button>
+        <button class="atab" data-atab="announce">اعلان سراسری 📢</button>
+        <button class="atab" data-atab="tags">مدیریت تگ‌ها 🏷️</button>
+        <button class="atab" data-atab="xp">سیستم XP و سطح ⭐</button>
+        <button class="atab" data-atab="badges">نشان‌ها 🏅</button>
+        <button class="atab" data-atab="livefeed">فید زنده کاربران 📡</button>
+        <button class="atab" data-atab="seo">SEO و متا 🔍</button>
+        <button class="atab" data-atab="custompages">صفحه‌های سفارشی 📄</button>
+        <button class="atab" data-atab="health">سلامت سیستم 💚</button>
+        <button class="atab" data-atab="reactions">واکنش‌ها و ایموجی 😊</button>
+        <button class="atab" data-atab="featured">پین و ویژه 📌</button>
+        <button class="atab" data-atab="newsletter">خبرنامه 📧</button>
+        <button class="atab" data-atab="pushnotif">اعلان پوش 🔔</button>
+        <button class="atab" data-atab="ads">جایگاه تبلیغ 📣</button>
+        <button class="atab" data-atab="partners">همکاران 🤝</button>
+        <button class="atab" data-atab="contests">مسابقه 🏆</button>
+        <button class="atab" data-atab="faq">سوالات متداول ❓</button>
+        <button class="atab" data-atab="roadmap">نقشه راه 🗺️</button>
+        <button class="atab" data-atab="changelog">تغییرات نسخه 📝</button>
+        <button class="atab" data-atab="roles">نقش‌های کاربری 👥</button>
+        <button class="atab" data-atab="filters">فیلتر محتوا 🛡️</button>
+        <button class="atab" data-atab="media">کتابخانه رسانه 🖼️</button>
+        <button class="atab" data-atab="embed">امبد ویدیو 📺</button>
+        <button class="atab" data-atab="hourly">خبر ساعتی ⏰</button>
+        <button class="atab" data-atab="regions">منطقه‌ها 🌍</button>
+        <button class="atab" data-atab="themeshop">تم فروشگاهی 🛍️</button>
+        <button class="atab" data-atab="apiinfo">وضعیت API 🔌</button>
+        <button class="atab" data-atab="cache">مدیریت کش 💾</button>
+        <button class="atab" data-atab="feedback">بازخورد کاربران 💬</button>
+        <button class="atab" data-atab="spotlight">اسپات‌لایت ✨</button>
+        <button class="atab" data-atab="maintenance2">حالت تعمیر جزئی 🔧</button>
+      </div>
+
+      <div id="apane-dashboard" class="apane active">
+        <h3>داشبورد سریع مالک</h3>
+        <div class="stat-row" id="dashboardStats"></div>
+        <h4 style="margin-top:16px;">اقدام سریع</h4>
+        <div class="mbtns">
+          <button class="mbtn" data-goto-atab="publish">📝 نوشتن خبر</button>
+          <button class="mbtn" data-goto-atab="messages">📢 پیام همگانی</button>
+          <button class="mbtn" data-goto-atab="reports">🚩 گزارش‌ها</button>
+          <button class="mbtn" data-goto-atab="newssuggest">💡 پیشنهاد خبر</button>
+          <button class="mbtn" data-goto-atab="bugreports">🐞 گزارش باگ</button>
+        </div>
+        <h4 style="margin-top:16px;">۵ فعالیت اخیر ادمین‌ها</h4>
+        <div id="dashboardActivity" class="manage-list"></div>
+        <h4 style="margin-top:16px;">۱۰ فعالیت اخیر بازیکن‌ها</h4>
+        <div id="dashboardPlayerActivity" class="manage-list"></div>
+        <h4 style="margin-top:16px;">حالت جشنواره/رویداد سایت</h4>
+        <p class="dim tiny">یه بنر جشنی موقت بالای سایت برای همه نشون می‌ده (مثلاً برای جام جهانی یا مناسبت خاص).</p>
+        <input id="eventModeText" type="text" placeholder="متن بنر رویداد (خالی = خاموش)">
+        <button id="saveEventMode" class="btn-ghost" style="margin-top:8px;">ذخیره</button>
+
+        <h4 style="margin-top:16px;">اطلاع‌رسانی آپدیت بعدی سایت</h4>
+        <p class="dim tiny">یه پیام شمارش‌معکوس بالای سایت نشون می‌ده (مثلاً «تا ۹ ساعت دیگه سایت آپدیت می‌شه»).</p>
+        <input id="updateHoursInput" type="number" min="0" placeholder="چند ساعت دیگه؟ (خالی = خاموش)">
+        <input id="updateMsgInput" type="text" placeholder="متن دلخواه (اختیاری، پیش‌فرض: «آپدیت بعدی سایت»)">
+        <button id="saveUpdateCountdown" class="btn-ghost" style="margin-top:8px;">ذخیره شمارش‌معکوس</button>
+      </div>
+
+      <div id="apane-publish" class="apane">
+        <h3>انتشار خبر جدید</h3>
+        <form id="publishForm">
+          <input id="pubTitle" type="text" placeholder="عنوان خبر" required>
+          <input id="pubImage" type="text" placeholder="آدرس عکس (اختیاری) — یا با ابزار پایین یه کاور بساز">
+          <input id="pubTag" type="text" placeholder="برچسب (مثلاً RPG، اکشن)" value="تحریریه">
+          <textarea id="pubBody" rows="6" placeholder="متن کامل خبر" required></textarea>
+          <button type="submit" class="btn-accent">انتشار خبر</button>
+        </form>
+
+        <div class="cover-designer">
+          <h4>🎨 ساخت عکس کاور برای این خبر</h4>
+          <p class="dim tiny">این یه ابزار طراحی ساده‌ست (رنگ + آیکون + متن) نه هوش مصنوعی تصویرساز؛ ولی یه کاور شیک و مرتبط با موضوع می‌سازه که هیچ‌وقت خراب نمی‌شه.</p>
+          <div class="option-row" id="coverColorPicker">
+            <button class="opt-btn active" data-cc="0" style="border-color:#7c5cff">بنفش</button>
+            <button class="opt-btn" data-cc="1" style="border-color:#d4a72c">طلایی</button>
+            <button class="opt-btn" data-cc="2" style="border-color:#4cc38a">سبز</button>
+            <button class="opt-btn" data-cc="3" style="border-color:#e0546a">قرمز</button>
+            <button class="opt-btn" data-cc="4" style="border-color:#2f8fd4">آبی</button>
+          </div>
+          <div class="emoji-row" id="coverEmojiPicker">
+            <button data-ce="controller" class="active" title="کنترلر"></button>
+            <button data-ce="sword" title="شمشیر"></button>
+            <button data-ce="trophy" title="جام"></button>
+            <button data-ce="dice" title="تاس (روبلاکس)"></button>
+            <button data-ce="pickaxe" title="کلنگ (ماینکرافت)"></button>
+            <button data-ce="ball" title="توپ"></button>
+            <button data-ce="film" title="فیلم/تریلر"></button>
+            <button data-ce="mask" title="انیمه"></button>
+            <button data-ce="lock" title="امنیت"></button>
+            <button data-ce="sparkle" title="آپدیت"></button>
+          </div>
+          <canvas id="coverCanvas" width="480" height="270" class="hidden"></canvas>
+          <div id="coverPreview" class="cover-preview"></div>
+          <button type="button" id="generateCoverBtn" class="btn-ghost full" style="margin-top:8px;">این کاور رو بساز و تو فرم بالا بذار</button>
+        </div>
+      </div>
+
+      <div id="apane-manage" class="apane">
+        <h3>مدیریت اخبار</h3>
+        <input id="manageSearchInput" type="text" placeholder="جستجو در عنوان خبرها...">
+        <div id="manageList" class="manage-list"></div>
+        <h3 style="margin-top:18px">آرشیو خبرها</h3>
+        <p class="dim tiny">به‌جای حذف کامل، می‌توانی خبر را آرشیو کنی و بعداً برگردانی.</p>
+        <div id="archiveList" class="manage-list"></div>
+      </div>
+
+      <div id="apane-members" class="apane">
+        <h3 data-i18n="membersTitle">اعضای ثبت‌نام‌شده</h3>
+        <p class="dim tiny" data-i18n="membersHint">به هر عضو تگ VIP، کریتور، تیک آبی یا نقش ادمین با دسترسی دلخواه بده.</p>
+        <div class="stat-row">
+          <div class="stat-box"><b id="statMembers">0</b><span>عضو</span></div>
+          <div class="stat-box"><b id="statComments">0</b><span>دیدگاه</span></div>
+          <div class="stat-box"><b id="statNews">0</b><span>خبر</span></div>
+          <div class="stat-box"><b id="statOnline">0</b><span>فعال ۷ روز اخیر</span></div>
+        </div>
+        <div class="mbtns">
+          <button id="exportMembersCsv" class="mbtn">خروجی CSV اعضا</button>
+          <button id="exportNewsCsv" class="mbtn">خروجی CSV اخبار</button>
+        </div>
+        <div id="memberList" class="manage-list"></div>
+      </div>
+
+      <div id="apane-messages" class="apane">
+        <h3>پیام همگانی</h3>
+        <form id="broadcastForm">
+          <textarea id="broadcastInput" rows="2" placeholder="پیام برای همه کاربران..."></textarea>
+          <button type="submit" class="btn-accent">ارسال به همه</button>
+        </form>
+        <h3>پیام به یک کاربر مشخص</h3>
+        <form id="dmForm">
+          <input id="dmTarget" type="text" placeholder="ایمیل یا شماره کاربر">
+          <textarea id="dmInput" rows="2" placeholder="متن پیام..."></textarea>
+          <button type="submit" class="btn-accent">ارسال پیام خصوصی</button>
+        </form>
+        <h3 style="margin-top:18px">پیام‌های دریافتی از کاربران (پشتیبانی)</h3>
+        <p class="dim tiny">پیام‌هایی که کاربرها به «پشتیبانی سایت» فرستاده‌اند. برای پاسخ، ایمیل/شماره‌شان را در فرم بالا بزن.</p>
+        <div id="adminInboxList" class="manage-list"></div>
+      </div>
+
+      <div id="apane-bans" class="apane">
+        <h3>لیست بن‌شده‌ها</h3>
+        <p class="dim tiny">هر کاربری که در دیدگاه، چت یا هوش مصنوعی الفاظ رکیک بنویسد خودکار بن می‌شود.</p>
+        <div id="banList" class="manage-list"></div>
+      </div>
+
+      <div id="apane-reports" class="apane">
+        <h3>گزارش‌های کاربران</h3>
+        <p class="dim tiny">وقتی کاربری خبر یا دیدگاهی را نامناسب می‌داند، از دکمه «گزارش» گزارش می‌دهد و اینجا می‌آید.</p>
+        <div id="reportList" class="manage-list"></div>
+      </div>
+
+      <div id="apane-schedule" class="apane">
+        <h3>زمان‌بندی انتشار خبر</h3>
+        <p class="dim tiny">خبر را از حالا آماده کن؛ سر زمان مشخص خودکار روی صفحه اصلی منتشر می‌شود (لازم است سایت در همان مرورگر باز/فعال بماند، چون سرور مستقل ندارد).</p>
+        <form id="scheduleForm">
+          <input id="schTitle" type="text" placeholder="عنوان خبر" required>
+          <input id="schTag" type="text" placeholder="برچسب" value="تحریریه">
+          <textarea id="schBody" rows="4" placeholder="متن کامل خبر" required></textarea>
+          <input id="schTime" type="datetime-local" required>
+          <button type="submit" class="btn-accent">زمان‌بندی کن</button>
+        </form>
+        <div id="scheduleList" class="manage-list"></div>
+      </div>
+
+      <div id="apane-analytics" class="apane">
+        <h3>آمار پیشرفته و دقیق</h3>
+        <div class="stat-row" id="analyticsStats"></div>
+        <p class="dim tiny">توزیع خبرها بر اساس برچسب</p>
+        <canvas id="tagChart" width="600" height="220" style="max-width:100%;background:var(--bg-alt);border-radius:10px;border:1px solid var(--border);"></canvas>
+        <p class="dim tiny" style="margin-top:14px;">رشد اعضای تازه (۷ روز اخیر)</p>
+        <canvas id="growthChart" width="600" height="180" style="max-width:100%;background:var(--bg-alt);border-radius:10px;border:1px solid var(--border);"></canvas>
+        <p class="dim tiny" style="margin-top:14px;">پرلایک‌ترین اخبار</p>
+        <div id="topLikedList" class="manage-list"></div>
+        <p class="dim tiny" style="margin-top:14px;">فعال‌ترین کاربران (بر اساس تعداد دیدگاه)</p>
+        <div id="topCommentersList" class="manage-list"></div>
+      </div>
+
+      <div id="apane-log" class="apane">
+        <h3>لاگ فعالیت ادمین‌ها</h3>
+        <p class="dim tiny">هر اقدام مدیریتی (انتشار، حذف، بن، پیام) اینجا ثبت می‌شود.</p>
+        <div class="stat-row">
+          <div class="stat-box"><b id="statMaintenance">خاموش</b><span>حالت تعمیر سایت</span></div>
+        </div>
+        <button id="toggleMaintenance" class="btn-ghost full">تغییر وضعیت تعمیر (فقط مالک)</button>
+        <div id="activityLog" class="manage-list" style="margin-top:14px;"></div>
+      </div>
+
+      <div id="apane-backup" class="apane">
+        <h3>پشتیبان‌گیری از داده‌های سایت</h3>
+        <p class="dim tiny">یک فایل JSON از همه داده‌های سایت (اخبار، اعضا، تنظیمات) می‌گیری و می‌توانی بعداً همان را برگردانی.</p>
+        <button id="exportBtn" class="btn-accent">دانلود فایل پشتیبان</button>
+        <div style="margin-top:14px;">
+          <label class="dim tiny">بازگردانی از فایل پشتیبان:</label><br>
+          <input type="file" id="importFile" accept=".json" style="margin-top:8px;">
+        </div>
+      </div>
+
+      <div id="apane-theme" class="apane">
+        <h3>سفارشی‌سازی ظاهر سایت</h3>
+        <p class="dim tiny">رنگ اصلی (طلایی) سایت را عوض کن؛ برای همه کاربران اعمال می‌شود.</p>
+        <div class="option-row" id="accentPicker">
+          <button class="opt-btn" data-accent="#d4a72c" style="background:#d4a72c;color:#241a02">طلایی</button>
+          <button class="opt-btn" data-accent="#7c5cff" style="background:#7c5cff;color:#fff">بنفش</button>
+          <button class="opt-btn" data-accent="#4cc38a" style="background:#4cc38a;color:#06281a">سبز</button>
+          <button class="opt-btn" data-accent="#e0546a" style="background:#e0546a;color:#fff">قرمز</button>
+          <button class="opt-btn" data-accent="#2f8fd4" style="background:#2f8fd4;color:#fff">آبی</button>
+        </div>
+      </div>
+
+      <div id="apane-admins" class="apane">
+        <h3>ساخت ادمین جدید</h3>
+        <p class="dim tiny">فقط مالک (parham-savar) می‌تواند ادمین بسازد یا حذف کند. نقش مالک قابل حذف نیست.</p>
+        <form id="addAdminForm">
+          <input id="newAdminName" type="text" placeholder="نام کاربری ادمین جدید">
+          <input id="newAdminPass" type="password" placeholder="رمز (حداقل ۸ کاراکتر)">
+          <input id="newAdminLabel" type="text" placeholder="برچسب نقش (مثلاً «ادمین محتوا» یا «ادمین امنیت» — اختیاری)">
+          <textarea id="newAdminNote" rows="2" placeholder="یادداشت داخلی درباره این ادمین (اختیاری، فقط مالک می‌بیند)"></textarea>
+          <label class="dim tiny" style="display:flex;flex-direction:column;gap:4px;">تاریخ انقضای دسترسی (اختیاری — خالی یعنی همیشگی)
+            <input id="newAdminExpiry" type="date">
+          </label>
+          <div class="perm-row">
+            <label><input type="checkbox" class="permChk" value="publish" checked> انتشار خبر</label>
+            <label><input type="checkbox" class="permChk" value="delete" checked> حذف/ویرایش/آرشیو محتوا</label>
+            <label><input type="checkbox" class="permChk" value="ban" checked> بن کاربر</label>
+            <label><input type="checkbox" class="permChk" value="message"> پیام همگانی و خصوصی</label>
+            <label><input type="checkbox" class="permChk" value="power"> ابزارهای پیشرفته (سنجاق، تیک، عملیات دسته‌جمعی)</label>
+            <label><input type="checkbox" class="permChk" value="security"> امنیت (تأیید دیدگاه، محدودیت ارسال، لیست سیاه)</label>
+            <label><input type="checkbox" class="permChk" value="schedule"> زمان‌بندی خبر و پیام</label>
+            <label><input type="checkbox" class="permChk" value="branding"> برندینگ و ظاهر سایت</label>
+            <label><input type="checkbox" class="permChk" value="backup"> پشتیبان‌گیری و بازیابی</label>
+            <label><input type="checkbox" class="permChk" value="reports"> گزارش‌ها و آمار</label>
+          </div>
+          <button type="submit" class="btn-accent">افزودن ادمین</button>
+        </form>
+        <div id="adminList" class="manage-list"></div>
+      </div>
+
+      <div id="apane-power" class="apane">
+        <h3>جستجوی کلی پنل</h3>
+        <input id="powerSearch" type="text" placeholder="جستجو در خبرها، اعضا و دیدگاه‌ها...">
+        <div id="powerSearchResults" class="manage-list"></div>
+
+        <h3 style="margin-top:18px">تیک آبی — اعطا یا حذف</h3>
+        <p class="dim tiny">به هر عضوی که بخوای می‌تونی تیک آبی تأیید بدی یا بگیری (مالک همیشه تیک دارد).</p>
+        <div id="verifyList" class="manage-list"></div>
+
+        <h3 style="margin-top:18px">سنجاق‌کردن خبر ویژه</h3>
+        <p class="dim tiny">خبر سنجاق‌شده همیشه بالای صفحه اصلی می‌ماند، حتی اگر خبر تازه‌تری بیاید.</p>
+        <div id="pinList" class="manage-list"></div>
+
+        <h3 style="margin-top:18px">قفل کلی دیدگاه‌ها</h3>
+        <div class="stat-row">
+          <div class="stat-box"><b id="statCommentsFrozen">باز</b><span>وضعیت دیدگاه‌ها</span></div>
+        </div>
+        <button id="toggleFreezeComments" class="btn-ghost full">باز/بسته‌کردن دیدگاه‌های کل سایت</button>
+
+        <h3 style="margin-top:18px">عملیات دسته‌جمعی</h3>
+        <div class="mbtns" style="margin-bottom:10px;">
+          <button id="bulkClearAuto" class="mbtn danger">پاک‌کردن همه اخبار رصدشده خودکار</button>
+          <button id="bulkClearComments" class="mbtn danger">پاک‌کردن همه دیدگاه‌های کل سایت</button>
+          <button id="bulkClearReports" class="mbtn">علامت‌زدن همه گزارش‌ها به‌عنوان بررسی‌شده</button>
+        </div>
+
+        <h3 style="margin-top:18px">فضای ذخیره‌سازی مرورگر</h3>
+        <div class="storage-bar"><div id="storageFill" class="storage-fill"></div></div>
+        <p class="dim tiny" id="storageText"></p>
+      </div>
+
+      <div id="apane-security" class="apane">
+        <h3>تأیید دستی دیدگاه‌ها</h3>
+        <p class="dim tiny">وقتی روشن باشد، دیدگاه‌های تازه اول تو صف تأیید می‌روند و بعد از تأیید مدیر عمومی می‌شوند.</p>
+        <div class="stat-row">
+          <div class="stat-box"><b id="statModeration">خاموش</b><span>وضعیت تأیید دستی</span></div>
+          <div class="stat-box"><b id="statPendingCount">0</b><span>در صف تأیید</span></div>
+        </div>
+        <button id="toggleModeration" class="btn-ghost full">روشن/خاموش کردن تأیید دستی</button>
+        <div id="pendingCommentsList" class="manage-list" style="margin-top:10px;"></div>
+
+        <h3 style="margin-top:18px">محدودیت ارسال (ضد اسپم)</h3>
+        <p class="dim tiny">وقتی روشن باشد، هر کاربر حداکثر هر ۱۰ ثانیه یک دیدگاه یا پیام می‌تواند بفرستد.</p>
+        <button id="toggleRateLimit" class="btn-ghost full">روشن/خاموش کردن محدودیت ارسال</button>
+
+        <h3 style="margin-top:18px">تاریخچه ورود به پنل</h3>
+        <p class="dim tiny">هر تلاش ورود موفق یا ناموفق به پنل ادمین اینجا ثبت می‌شود.</p>
+        <div id="loginHistoryList" class="manage-list"></div>
+
+        <h3 style="margin-top:18px">اطلاعات همین نشست</h3>
+        <p class="dim tiny">این فقط اطلاعات مرورگر فعلی توست، نه ردیابی واقعی چند دستگاه (چون سایت سرور ندارد).</p>
+        <div id="sessionInfo" class="code-block" style="max-height:120px;"></div>
+
+        <h3 style="margin-top:18px">قفل ثبت‌نام اعضای جدید</h3>
+        <p class="dim tiny">وقتی روشن باشد، هیچ عضو تازه‌ای نمی‌تواند ثبت‌نام کند (اعضای قبلی می‌توانند وارد شوند).</p>
+        <button id="toggleSignupLock" class="btn-ghost full">روشن/خاموش کردن قفل ثبت‌نام</button>
+
+        <h3 style="margin-top:18px">خروج اجباری از همه نشست‌های ادمین</h3>
+        <p class="dim tiny">همه ادمین‌های واردشده (به‌جز خودت الان) مجبور به ورود دوباره می‌شوند — برای مواقع مشکوک.</p>
+        <button id="forceLogoutAll" class="btn-ghost full" style="color:var(--danger);border-color:var(--danger)">خروج اجباری از همه نشست‌ها</button>
+
+        <h3 style="margin-top:18px">لیست سیاه کلمات (قابل ویرایش)</h3>
+        <p class="dim tiny">کلمات پیش‌فرض همیشه فعال‌اند؛ اینجا می‌توانی کلمات بیشتری برای بن خودکار اضافه کنی.</p>
+        <form id="addBadWordForm" style="flex-direction:row;gap:8px;">
+          <input id="newBadWord" type="text" placeholder="کلمه تازه...">
+          <button type="submit" class="mbtn">افزودن</button>
+        </form>
+        <div id="customBadWordsList" class="manage-list"></div>
+      </div>
+
+      <div id="apane-branding" class="apane">
+        <h3>اسم و شعار سایت</h3>
+        <form id="brandingForm">
+          <input id="brandSiteName" type="text" placeholder="اسم سایت (مثلاً GameHub)">
+          <input id="brandTagline" type="text" placeholder="شعار کوتاه زیر اسم (اختیاری)">
+          <button type="submit" class="btn-accent full">ذخیره برندینگ</button>
+        </form>
+
+        <h3 style="margin-top:18px">آیکون سایت (بالای صفحه به‌جای تاج)</h3>
+        <input type="file" id="brandIconUpload" accept="image/*">
+        <button id="resetBrandIcon" class="btn-ghost" style="margin-top:8px;">بازگشت به تاج پیش‌فرض</button>
+
+        <h3 style="margin-top:18px">رنگ ثانویه سایت</h3>
+        <div class="option-row" id="accent2Picker">
+          <button class="opt-btn" data-accent2="violet" style="border-color:#7c5cff">بنفش</button>
+          <button class="opt-btn" data-accent2="blue" style="border-color:#2f8fd4">آبی</button>
+          <button class="opt-btn" data-accent2="green" style="border-color:#4cc38a">سبز</button>
+          <button class="opt-btn" data-accent2="red" style="border-color:#e0546a">قرمز</button>
+        </div>
+
+        <h3 style="margin-top:18px">نمایش لینک منبع خبرهای تحریریه</h3>
+        <button id="toggleHideSource" class="btn-ghost full">روشن/خاموش کردن نمایش لینک منبع</button>
+
+        <h3 style="margin-top:18px">تعداد خبر نمایش‌داده‌شده در صفحه اصلی</h3>
+        <input id="homeFeedLimitInput" type="number" min="5" max="100" placeholder="پیش‌فرض: همه">
+        <button id="saveFeedLimit" class="btn-ghost full" style="margin-top:8px;">ذخیره محدودیت</button>
+      </div>
+
+      <div id="apane-automation" class="apane">
+        <h3>پیام خوش‌آمد خودکار</h3>
+        <p class="dim tiny">وقتی روشن باشد، هر عضو تازه بلافاصله بعد از ثبت‌نام یک پیام خصوصی خوش‌آمد از طرف مالک می‌گیرد.</p>
+        <button id="toggleWelcomeDm" class="btn-ghost full">روشن/خاموش کردن خوش‌آمد خودکار</button>
+        <textarea id="welcomeDmText" rows="2" placeholder="متن پیام خوش‌آمد..." style="margin-top:8px;width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px;font-family:var(--font-body);"></textarea>
+        <button id="saveWelcomeDmText" class="mbtn" style="margin-top:6px;">ذخیره متن</button>
+
+        <h3 style="margin-top:18px">قالب‌های آماده پیام همگانی</h3>
+        <div class="mbtns" id="broadcastTemplates">
+          <button class="mbtn" data-tpl="خبر مهمی به‌زودی منتشر می‌شود، همراه ما باشید! 🎮">خبر به‌زودی</button>
+          <button class="mbtn" data-tpl="سایت در حال بروزرسانی است، ممکنه چند دقیقه کند باشد.">بروزرسانی سایت</button>
+          <button class="mbtn" data-tpl="یادآوری: رعایت احترام تو کامنت‌ها و چت الزامیه، تخلف = بن خودکار.">یادآوری قوانین</button>
+          <button class="mbtn" data-tpl="ممنون از همراهی همه اعضای گیم‌هاب! 👑">تشکر از اعضا</button>
+        </div>
+
+        <h3 style="margin-top:18px">زمان‌بندی پیام همگانی</h3>
+        <form id="scheduleBroadcastForm">
+          <textarea id="scheduleBroadcastText" rows="2" placeholder="متن پیام..."></textarea>
+          <input id="scheduleBroadcastTime" type="datetime-local">
+          <button type="submit" class="btn-accent full">زمان‌بندی کن</button>
+        </form>
+        <div id="scheduledBroadcastList" class="manage-list"></div>
+      </div>
+
+      <div id="apane-gamesmgmt" class="apane">
+        <h3>مدیریت ۳۰ بازی سایت</h3>
+        <p class="dim tiny">لیدربورد هر بازی و هر سطح رو ببین یا در صورت نیاز کامل پاک کن — همه به‌صورت زنده با بازیکن‌ها همگام است.</p>
+        <input id="gamesMgmtSearch" class="ticket-field" type="text" placeholder="جستجوی نام بازی...">
+        <div id="gamesLeaderboardMgmt" class="manage-list"></div>
+      </div>
+
+      <div id="apane-robloxmgmt" class="apane">
+        <h3>مدیریت بخش‌های صفحه روبلاکس</h3>
+        <form id="addRobloxSectionForm">
+          <input id="robloxSecTitle" type="text" placeholder="عنوان بخش">
+          <textarea id="robloxSecText" rows="2" placeholder="توضیح..."></textarea>
+          <button type="submit" class="btn-accent">افزودن بخش</button>
+        </form>
+        <div id="robloxSectionsList" class="manage-list" style="margin-top:10px;"></div>
+        <h3 style="margin-top:18px">اخبار رصدشده روبلاکس</h3>
+        <div id="robloxNewsMgmt" class="manage-list"></div>
+      </div>
+
+      <div id="apane-shortsmgmt" class="apane">
+        <h3>مدیریت ویدیوهای شورتس</h3>
+        <div id="shortsMgmtList" class="manage-list"></div>
+      </div>
+
+      <div id="apane-exploremgmt" class="apane">
+        <h3>مدیریت پست‌های اکسپلور</h3>
+        <div id="exploreMgmtList" class="manage-list"></div>
+      </div>
+
+      <div id="apane-invites" class="apane">
+        <h3>کدهای دعوت</h3>
+        <p class="dim tiny">وقتی «قفل ثبت‌نام» در تب امنیت روشن باشد، فقط کسانی که کد دعوت معتبر دارند می‌توانند عضو شوند.</p>
+        <form id="createInviteForm">
+          <input id="inviteMaxUses" type="number" min="1" placeholder="حداکثر تعداد استفاده (مثلاً 5)">
+          <button type="submit" class="btn-accent">ساخت کد دعوت تازه</button>
+        </form>
+        <div id="inviteList" class="manage-list" style="margin-top:10px;"></div>
+      </div>
+
+      <div id="apane-polls" class="apane">
+        <h3>ساخت نظرسنجی تازه</h3>
+        <form id="createPollForm">
+          <input id="pollQuestion" type="text" placeholder="سوال نظرسنجی">
+          <input id="pollOptions" type="text" placeholder="گزینه‌ها با کاما جدا کن (مثلاً: الدن رینگ، جی‌تی‌ای، فیفا)">
+          <button type="submit" class="btn-accent">انتشار نظرسنجی</button>
+        </form>
+        <h3 style="margin-top:18px">نظرسنجی فعال و نتایج</h3>
+        <div id="activePollAdmin" class="manage-list"></div>
+      </div>
+
+      <div id="apane-bugreports" class="apane">
+        <h3>🎧 تیکت‌های پشتیبانی کاربران</h3>
+        <p class="dim tiny">کاربرها از بخش تنظیمات تیکت پشتیبانی (باگ، حساب، مالی، پیشنهاد و...) ارسال می‌کنند. برای پاسخ دادن، روی «پاسخ» بزن؛ پیام مستقیم زیر «پشتیبانی سایت» برای کاربر ارسال می‌شود.</p>
+        <div class="stat-row" id="ticketStats"></div>
+        <div class="support-filter-row" id="ticketFilters">
+          <button class="tag active" data-tfilter-status="all">همه</button>
+          <button class="tag" data-tfilter-status="open">باز 🔴</button>
+          <button class="tag" data-tfilter-status="progress">در حال بررسی 🟡</button>
+          <button class="tag" data-tfilter-status="resolved">حل‌شده 🟢</button>
+          <span style="width:1px;background:var(--border);"></span>
+          <button class="tag" data-tfilter-cat="bug">🐞 باگ</button>
+          <button class="tag" data-tfilter-cat="account">👤 حساب</button>
+          <button class="tag" data-tfilter-cat="payment">💳 مالی</button>
+          <button class="tag" data-tfilter-cat="suggestion">💡 پیشنهاد</button>
+          <button class="tag" data-tfilter-cat="other">❓ سایر</button>
+          <button class="tag" data-tfilter-cat="">پاک‌کردن فیلتر دسته</button>
+        </div>
+        <div id="bugReportsList" class="manage-list"></div>
+      </div>
+
+      <div id="apane-ownernotes" class="apane">
+        <h3>یادداشت‌های شخصی مالک 🔒</h3>
+        <p class="dim tiny">این فقط برای مالک است، هیچ ادمین یا کاربر دیگری نمی‌بیند. خودکار ذخیره می‌شود.</p>
+        <textarea id="ownerNotesText" rows="10" placeholder="یادداشت، برنامه، ایده... هرچی بخوای اینجا بنویس." style="width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:12px;font-family:var(--font-body);"></textarea>
+      </div>
+
+      <div id="apane-adminroom" class="apane">
+        <h3>اتاق گفتگوی ادمین‌ها 🗣️</h3>
+        <p class="dim tiny">فقط مالک و ادمین‌ها اینجا رو می‌بینن — برای هماهنگی و تصمیم‌گیری با هم.</p>
+        <div id="adminRoomWindow" class="chat-window"></div>
+        <form id="adminRoomForm" class="chat-form">
+          <input id="adminRoomInput" type="text" placeholder="پیامت رو بنویس...">
+          <button type="submit" class="btn-accent">ارسال</button>
+        </form>
+      </div>
+
+      <div id="apane-newssuggest" class="apane">
+        <h3>پیشنهادهای خبر کاربران</h3>
+        <p class="dim tiny">پس از تأیید، مستقیم به‌عنوان خبر تحریریه منتشر می‌شود.</p>
+        <div id="newsSuggestList" class="manage-list"></div>
+      </div>
+
+      <div id="apane-aboutus" class="apane">
+        <h3>ویرایش صفحه «درباره ما»</h3>
+        <form id="aboutUsForm">
+          <textarea id="aboutUsText" rows="6" placeholder="متن معرفی سایت، مالک و تیم..." style="width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px;font-family:var(--font-body);"></textarea>
+          <button type="submit" class="btn-accent" style="margin-top:8px;">ذخیره متن</button>
+        </form>
+        <h3 style="margin-top:18px">پیام‌های مالک/ادمین در صفحه درباره ما</h3>
+        <form id="aboutUsMsgForm">
+          <textarea id="aboutUsMsgText" rows="2" placeholder="یه پیام کوتاه بذار..." style="width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px;font-family:var(--font-body);"></textarea>
+          <button type="submit" class="btn-ghost" style="margin-top:8px;">افزودن پیام</button>
+        </form>
+        <div id="aboutUsMsgList" class="manage-list" style="margin-top:10px;"></div>
+      </div>
+
+      <div id="apane-site" class="apane">
+        <h3>مشخصات کامل سایت</h3>
+        <pre id="siteInfoCode" class="code-block"></pre>
+        <button id="copySiteInfo" class="btn-accent">کپی مشخصات</button>
+      </div>
+
+      <div id="apane-ai" class="apane">
+        <h3>اتاق فرمان مالک 🔒</h3>
+        <p class="dim tiny">این هوش مصنوعی فقط برای مالک و ادمین‌هاست و در صفحهٔ اصلی برای کاربران عادی دیده نمی‌شود. برای دیدن همه فرمان‌ها بنویس «راهنما» — از انتشار و حذف خبر گرفته تا بن کاربر، حالت تعمیر، تغییر رنگ سایت و پشتیبان‌گیری، همه از همینجا قابل اجراست.</p>
+        <div id="ownerChatWindow" class="chat-window"></div>
+        <form id="ownerAiForm" class="chat-form">
+          <button type="button" id="ownerAiAttachBtn" class="btn-ghost" title="پیوست عکس/فایل">📎</button>
+          <input type="file" id="ownerAiAttachInput" accept="image/*,.pdf,.txt" class="hidden">
+          <input id="ownerAiInput" type="text" placeholder="فرمان بده یا سوال بپرس...">
+          <button type="submit" class="btn-accent">اجرا</button>
+        </form>
+      </div>
+
+      <div id="apane-announce" class="apane">
+        <h3>اعلان سراسری 📢</h3>
+        <p class="dim tiny">متن اعلان برای همهٔ بازدیدکننده‌ها به‌صورت بنر بالای سایت نمایش داده می‌شود و روی سرور ذخیره می‌گردد.</p>
+        <textarea id="announceText" rows="3" placeholder="متن اعلان..." style="width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px;"></textarea>
+        <div class="option-row" style="margin-top:10px;gap:8px;flex-wrap:wrap;">
+          <button id="announcePublishBtn" class="btn-accent">انتشار اعلان</button>
+          <button id="announceClearBtn" class="btn-ghost">پاک کردن اعلان</button>
+        </div>
+        <div id="announcePreview" class="side-card" style="margin-top:12px;"></div>
+      </div>
+
+      <div id="apane-tags" class="apane">
+        <h3>مدیریت تگ‌ها 🏷️</h3>
+        <p class="dim tiny">تگ‌های خبر و فیلتر فید را مدیریت کن. تغییرات برای همه هم‌زمان اعمال می‌شود.</p>
+        <form id="addTagForm" class="option-row" style="gap:8px;flex-wrap:wrap;">
+          <input id="newTagName" type="text" placeholder="نام تگ جدید" style="flex:1;min-width:140px;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:8px 12px;">
+          <button type="submit" class="btn-accent">افزودن</button>
+        </form>
+        <div id="tagsList" style="margin-top:12px;"></div>
+      </div>
+
+      <div id="apane-xp" class="apane">
+        <h3>سیستم XP و سطح ⭐</h3>
+        <p class="dim tiny">ضریب امتیازدهی کاربران برای لایک، کامنت و بازی. روی سرور ذخیره می‌شود.</p>
+        <label class="dim tiny">XP به‌ازای لایک</label>
+        <input id="xpLike" type="number" min="0" max="100" value="2" style="width:100%;margin-bottom:8px;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:8px 12px;">
+        <label class="dim tiny">XP به‌ازای کامنت</label>
+        <input id="xpComment" type="number" min="0" max="100" value="5" style="width:100%;margin-bottom:8px;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:8px 12px;">
+        <label class="dim tiny">XP به‌ازای برد بازی</label>
+        <input id="xpGameWin" type="number" min="0" max="200" value="15" style="width:100%;margin-bottom:8px;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:8px 12px;">
+        <button id="xpSaveBtn" class="btn-accent">ذخیره تنظیمات XP</button>
+        <div id="xpTopList" style="margin-top:14px;"></div>
+      </div>
+
+      <div id="apane-badges" class="apane">
+        <h3>نشان‌ها 🏅</h3>
+        <p class="dim tiny">نشان‌های قابل اعطا به کاربران. همگانی و هم‌زمان.</p>
+        <form id="addBadgeForm" class="option-row" style="gap:8px;flex-wrap:wrap;">
+          <input id="badgeEmoji" type="text" placeholder="🏅" maxlength="4" style="width:60px;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:8px;text-align:center;">
+          <input id="badgeName" type="text" placeholder="نام نشان" style="flex:1;min-width:120px;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:8px 12px;">
+          <button type="submit" class="btn-accent">افزودن نشان</button>
+        </form>
+        <div id="badgesList" style="margin-top:12px;"></div>
+      </div>
+
+      <div id="apane-livefeed" class="apane">
+        <h3>فید زنده کاربران 📡</h3>
+        <p class="dim tiny">آخرین فعالیت‌های بازیکن‌ها — به‌روزرسانی خودکار از سرور.</p>
+        <button id="livefeedRefreshBtn" class="btn-ghost">تازه‌سازی</button>
+        <div id="livefeedList" style="margin-top:12px;"></div>
+      </div>
+
+      <div id="apane-seo" class="apane">
+        <h3>SEO و متا 🔍</h3>
+        <label class="dim tiny">عنوان سایت</label>
+        <input id="seoTitle" type="text" style="width:100%;margin-bottom:8px;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:8px 12px;">
+        <label class="dim tiny">توضیحات متا</label>
+        <textarea id="seoDesc" rows="2" style="width:100%;margin-bottom:8px;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:8px 12px;"></textarea>
+        <label class="dim tiny">کلمات کلیدی (با ویرگول)</label>
+        <input id="seoKeywords" type="text" style="width:100%;margin-bottom:8px;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:8px 12px;">
+        <button id="seoSaveBtn" class="btn-accent">ذخیره SEO</button>
+      </div>
+
+      <div id="apane-custompages" class="apane">
+        <h3>صفحه‌های سفارشی 📄</h3>
+        <p class="dim tiny">صفحهٔ متنی اضافه برای قوانین، حریم خصوصی و …</p>
+        <form id="customPageForm">
+          <input id="cpSlug" type="text" placeholder="slug مثلا rules" style="width:100%;margin-bottom:8px;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:8px 12px;">
+          <input id="cpTitle" type="text" placeholder="عنوان صفحه" style="width:100%;margin-bottom:8px;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:8px 12px;">
+          <textarea id="cpBody" rows="4" placeholder="متن صفحه..." style="width:100%;margin-bottom:8px;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:8px 12px;"></textarea>
+          <button type="submit" class="btn-accent">ذخیره صفحه</button>
+        </form>
+        <div id="customPagesList" style="margin-top:12px;"></div>
+      </div>
+
+      <div id="apane-health" class="apane">
+        <h3>سلامت سیستم 💚</h3>
+        <button id="healthCheckBtn" class="btn-accent">بررسی سلامت</button>
+        <div id="healthResult" class="side-card" style="margin-top:12px;"></div>
+      </div>
+
+      <div id="apane-reactions" class="apane">
+        <h3>واکنش‌ها و ایموجی 😊</h3>
+        <p class="dim tiny">ایموجی‌های مجاز برای واکنش به اخبار. همگانی.</p>
+        <input id="reactionsInput" type="text" placeholder="مثلا 👍,🔥,❤️,😂,😮" style="width:100%;margin-bottom:8px;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:8px 12px;">
+        <button id="reactionsSaveBtn" class="btn-accent">ذخیره واکنش‌ها</button>
+        <div id="reactionsPreview" style="margin-top:10px;font-size:1.4rem;"></div>
+      </div>
+
+      <div id="apane-featured" class="apane">
+        <h3>پین و ویژه 📌</h3>
+        <p class="dim tiny">خبرهای پین‌شده بالای فید برای همه نمایش داده می‌شوند.</p>
+        <div id="featuredList"></div>
+      </div>
+      <div id="apane-newsletter" class="apane">
+        <h3>خبرنامه 📧</h3>
+        <p class="dim tiny">متن خوش‌آمد یا توضیح عضویت در خبرنامه — روی سرور ذخیره می‌شود.</p>
+        <textarea id="newsletterText" rows="4" placeholder="متن یا تنظیمات..." style="width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px;"></textarea>
+        <button class="btn-accent" style="margin-top:10px;" data-save-extra="newsletter">ذخیره</button>
+        <div id="newsletterStatus" class="dim tiny" style="margin-top:8px;"></div>
+      </div>
+      <div id="apane-pushnotif" class="apane">
+        <h3>اعلان پوش 🔔</h3>
+        <p class="dim tiny">پیام پیش‌فرض اعلان مرورگر برای کاربران.</p>
+        <textarea id="pushnotifText" rows="4" placeholder="متن یا تنظیمات..." style="width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px;"></textarea>
+        <button class="btn-accent" style="margin-top:10px;" data-save-extra="pushnotif">ذخیره</button>
+        <div id="pushnotifStatus" class="dim tiny" style="margin-top:8px;"></div>
+      </div>
+      <div id="apane-ads" class="apane">
+        <h3>جایگاه تبلیغ 📣</h3>
+        <p class="dim tiny">کد یا متن جایگاه تبلیغاتی سایدبار.</p>
+        <textarea id="adsText" rows="4" placeholder="متن یا تنظیمات..." style="width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px;"></textarea>
+        <button class="btn-accent" style="margin-top:10px;" data-save-extra="ads">ذخیره</button>
+        <div id="adsStatus" class="dim tiny" style="margin-top:8px;"></div>
+      </div>
+      <div id="apane-partners" class="apane">
+        <h3>همکاران 🤝</h3>
+        <p class="dim tiny">لیست همکاران و اسپانسرها.</p>
+        <textarea id="partnersText" rows="4" placeholder="متن یا تنظیمات..." style="width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px;"></textarea>
+        <button class="btn-accent" style="margin-top:10px;" data-save-extra="partners">ذخیره</button>
+        <div id="partnersStatus" class="dim tiny" style="margin-top:8px;"></div>
+      </div>
+      <div id="apane-contests" class="apane">
+        <h3>مسابقه 🏆</h3>
+        <p class="dim tiny">قوانین و جایزه مسابقه جاری.</p>
+        <textarea id="contestsText" rows="4" placeholder="متن یا تنظیمات..." style="width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px;"></textarea>
+        <button class="btn-accent" style="margin-top:10px;" data-save-extra="contests">ذخیره</button>
+        <div id="contestsStatus" class="dim tiny" style="margin-top:8px;"></div>
+      </div>
+      <div id="apane-faq" class="apane">
+        <h3>سوالات متداول ❓</h3>
+        <p class="dim tiny">۱۲ سوال پیش‌فرض همیشه در بخش پشتیبانی به کاربرها نشان داده می‌شود. اگر اینجا متنی بنویسی، به‌عنوان اطلاعیهٔ ویژه بالای FAQ اضافه می‌شود (مثلاً اطلاع‌رسانی قطعی سرویس).</p>
+        <textarea id="faqText" rows="4" placeholder="متن یا تنظیمات..." style="width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px;"></textarea>
+        <button class="btn-accent" style="margin-top:10px;" data-save-extra="faq">ذخیره</button>
+        <div id="faqStatus" class="dim tiny" style="margin-top:8px;"></div>
+      </div>
+      <div id="apane-roadmap" class="apane">
+        <h3>نقشه راه 🗺️</h3>
+        <p class="dim tiny">برنامهٔ ویژگی‌های آینده.</p>
+        <textarea id="roadmapText" rows="4" placeholder="متن یا تنظیمات..." style="width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px;"></textarea>
+        <button class="btn-accent" style="margin-top:10px;" data-save-extra="roadmap">ذخیره</button>
+        <div id="roadmapStatus" class="dim tiny" style="margin-top:8px;"></div>
+      </div>
+      <div id="apane-changelog" class="apane">
+        <h3>تغییرات نسخه 📝</h3>
+        <p class="dim tiny">یادداشت نسخهٔ جاری.</p>
+        <textarea id="changelogText" rows="4" placeholder="متن یا تنظیمات..." style="width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px;"></textarea>
+        <button class="btn-accent" style="margin-top:10px;" data-save-extra="changelog">ذخیره</button>
+        <div id="changelogStatus" class="dim tiny" style="margin-top:8px;"></div>
+      </div>
+      <div id="apane-roles" class="apane">
+        <h3>نقش‌های کاربری 👥</h3>
+        <p class="dim tiny">توضیح نقش‌ها: مهمان، عضو، ویرایشگر.</p>
+        <textarea id="rolesText" rows="4" placeholder="متن یا تنظیمات..." style="width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px;"></textarea>
+        <button class="btn-accent" style="margin-top:10px;" data-save-extra="roles">ذخیره</button>
+        <div id="rolesStatus" class="dim tiny" style="margin-top:8px;"></div>
+      </div>
+      <div id="apane-filters" class="apane">
+        <h3>فیلتر محتوا 🛡️</h3>
+        <p class="dim tiny">کلمات حساس اضافی (با ویرگول).</p>
+        <textarea id="filtersText" rows="4" placeholder="متن یا تنظیمات..." style="width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px;"></textarea>
+        <button class="btn-accent" style="margin-top:10px;" data-save-extra="filters">ذخیره</button>
+        <div id="filtersStatus" class="dim tiny" style="margin-top:8px;"></div>
+      </div>
+      <div id="apane-media" class="apane">
+        <h3>کتابخانه رسانه 🖼️</h3>
+        <p class="dim tiny">یادداشت لینک‌های تصویر/ویدیو ذخیره‌شده.</p>
+        <textarea id="mediaText" rows="4" placeholder="متن یا تنظیمات..." style="width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px;"></textarea>
+        <button class="btn-accent" style="margin-top:10px;" data-save-extra="media">ذخیره</button>
+        <div id="mediaStatus" class="dim tiny" style="margin-top:8px;"></div>
+      </div>
+      <div id="apane-embed" class="apane">
+        <h3>امبد ویدیو 📺</h3>
+        <p class="dim tiny">کد امبد پیش‌فرض یوتیوب برای صفحهٔ اصلی.</p>
+        <textarea id="embedText" rows="4" placeholder="متن یا تنظیمات..." style="width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px;"></textarea>
+        <button class="btn-accent" style="margin-top:10px;" data-save-extra="embed">ذخیره</button>
+        <div id="embedStatus" class="dim tiny" style="margin-top:8px;"></div>
+      </div>
+      <div id="apane-hourly" class="apane">
+        <h3>خبر ساعتی ⏰</h3>
+        <p class="dim tiny">تیتر چرخشی خبر ساعتی.</p>
+        <textarea id="hourlyText" rows="4" placeholder="متن یا تنظیمات..." style="width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px;"></textarea>
+        <button class="btn-accent" style="margin-top:10px;" data-save-extra="hourly">ذخیره</button>
+        <div id="hourlyStatus" class="dim tiny" style="margin-top:8px;"></div>
+      </div>
+      <div id="apane-regions" class="apane">
+        <h3>منطقه‌ها 🌍</h3>
+        <p class="dim tiny">مناطق فعال پوشش خبر (مثلاً ایران، جهانی).</p>
+        <textarea id="regionsText" rows="4" placeholder="متن یا تنظیمات..." style="width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px;"></textarea>
+        <button class="btn-accent" style="margin-top:10px;" data-save-extra="regions">ذخیره</button>
+        <div id="regionsStatus" class="dim tiny" style="margin-top:8px;"></div>
+      </div>
+      <div id="apane-themeshop" class="apane">
+        <h3>تم فروشگاهی 🛍️</h3>
+        <p class="dim tiny">توضیح تم‌های قابل انتخاب کاربر.</p>
+        <textarea id="themeshopText" rows="4" placeholder="متن یا تنظیمات..." style="width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px;"></textarea>
+        <button class="btn-accent" style="margin-top:10px;" data-save-extra="themeshop">ذخیره</button>
+        <div id="themeshopStatus" class="dim tiny" style="margin-top:8px;"></div>
+      </div>
+      <div id="apane-apiinfo" class="apane">
+        <h3>وضعیت API 🔌</h3>
+        <p class="dim tiny">یادداشت وضعیت کلیدها و سرویس‌ها.</p>
+        <textarea id="apiinfoText" rows="4" placeholder="متن یا تنظیمات..." style="width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px;"></textarea>
+        <button class="btn-accent" style="margin-top:10px;" data-save-extra="apiinfo">ذخیره</button>
+        <div id="apiinfoStatus" class="dim tiny" style="margin-top:8px;"></div>
+      </div>
+      <div id="apane-cache" class="apane">
+        <h3>مدیریت کش 💾</h3>
+        <p class="dim tiny">دکمهٔ پاکسازی از پنل؛ متن راهنما.</p>
+        <textarea id="cacheText" rows="4" placeholder="متن یا تنظیمات..." style="width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px;"></textarea>
+        <button class="btn-accent" style="margin-top:10px;" data-save-extra="cache">ذخیره</button>
+        <div id="cacheStatus" class="dim tiny" style="margin-top:8px;"></div>
+      </div>
+      <div id="apane-feedback" class="apane">
+        <h3>بازخورد کاربران 💬</h3>
+        <p class="dim tiny">پیام پاسخ خودکار به بازخورد.</p>
+        <textarea id="feedbackText" rows="4" placeholder="متن یا تنظیمات..." style="width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px;"></textarea>
+        <button class="btn-accent" style="margin-top:10px;" data-save-extra="feedback">ذخیره</button>
+        <div id="feedbackStatus" class="dim tiny" style="margin-top:8px;"></div>
+      </div>
+      <div id="apane-spotlight" class="apane">
+        <h3>اسپات‌لایت ✨</h3>
+        <p class="dim tiny">کاربر یا خبر ویژهٔ هفته.</p>
+        <textarea id="spotlightText" rows="4" placeholder="متن یا تنظیمات..." style="width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px;"></textarea>
+        <button class="btn-accent" style="margin-top:10px;" data-save-extra="spotlight">ذخیره</button>
+        <div id="spotlightStatus" class="dim tiny" style="margin-top:8px;"></div>
+      </div>
+      <div id="apane-maintenance2" class="apane">
+        <h3>حالت تعمیر جزئی 🔧</h3>
+        <p class="dim tiny">پیام تعمیر فقط برای یک بخش.</p>
+        <textarea id="maintenance2Text" rows="4" placeholder="متن یا تنظیمات..." style="width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px;"></textarea>
+        <button class="btn-accent" style="margin-top:10px;" data-save-extra="maintenance2">ذخیره</button>
+        <div id="maintenance2Status" class="dim tiny" style="margin-top:8px;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SETTINGS VIEW -->
+  <section id="view-settings" class="view">
+    <h2 class="view-title" data-i18n="settings">تنظیمات</h2>
+    <div class="settings-grid">
+      <div class="side-card">
+        <h3>پوسته سایت</h3>
+        <div class="option-row">
+          <button class="opt-btn" data-theme="dark">تیره</button>
+          <button class="opt-btn" data-theme="light">روشن</button>
+        </div>
+      </div>
+      <div class="side-card">
+        <h3>چیدمان کارت‌ها</h3>
+        <div class="option-row">
+          <button class="opt-btn" data-density="normal">عادی</button>
+          <button class="opt-btn" data-density="compact">فشرده</button>
+        </div>
+      </div>
+      <div class="side-card">
+        <h3>زبان و ترجمه</h3>
+        <p class="dim tiny">زبان رابط کاربری از منوی بالا قابل تغییر است. برای ترجمه کامل محتوای صفحه به زبان انتخابی:</p>
+        <button id="translatePageBtn" class="btn-ghost full">باز کردن ترجمه گوگل برای این صفحه</button>
+      </div>
+      <div class="side-card">
+        <h3>پخش خودکار شورتس</h3>
+        <p class="dim tiny">ویدیوهای شورتس هنگام رسیدن به آن‌ها خودکار پخش شوند؟</p>
+        <div class="option-row">
+          <button class="opt-btn" data-autoplay="on">روشن</button>
+          <button class="opt-btn" data-autoplay="off">خاموش</button>
+        </div>
+      </div>
+      <div class="side-card">
+        <h3>پیام‌های همگانی</h3>
+        <p class="dim tiny">آیا پیام همگانی مالک به‌صورت بنر بالای صفحه نشان داده شود؟</p>
+        <div class="option-row">
+          <button class="opt-btn" data-broadcastpref="on">نمایش بده</button>
+          <button class="opt-btn" data-broadcastpref="off">نشان نده</button>
+        </div>
+      </div>
+      <div class="side-card">
+        <h3>اعلان صدادار</h3>
+        <p class="dim tiny">پخش صدای کوتاه هنگام دریافت پیام خصوصی جدید.</p>
+        <div class="option-row">
+          <button class="opt-btn" data-soundpref="on">روشن</button>
+          <button class="opt-btn" data-soundpref="off">خاموش</button>
+        </div>
+      </div>
+      <div class="side-card">
+        <h3>رنگ شخصی شما</h3>
+        <p class="dim tiny">این فقط ظاهر سایت رو برای خودت عوض می‌کنه، رو بقیه کاربرا اثر نداره.</p>
+        <div class="option-row" id="myAccentPicker">
+          <button class="opt-btn" data-myaccent="default">پیش‌فرض سایت</button>
+          <button class="opt-btn" data-myaccent="gold" style="border-color:#d4a72c">طلایی</button>
+          <button class="opt-btn" data-myaccent="violet" style="border-color:#7c5cff">بنفش</button>
+          <button class="opt-btn" data-myaccent="green" style="border-color:#4cc38a">سبز</button>
+          <button class="opt-btn" data-myaccent="pink" style="border-color:#e0546a">صورتی</button>
+        </div>
+      </div>
+      <div class="side-card">
+        <h3>داده‌های من روی این مرورگر</h3>
+        <p class="dim tiny">حساب و ذخیره‌های تو فقط روی همین مرورگر است. می‌توانی خارج شوی یا داده‌های خودت را پاک کنی.</p>
+        <button id="wipeMyDataBtn" class="btn-ghost full" style="color:var(--danger);border-color:var(--danger)">پاک‌کردن داده‌های من از این مرورگر</button>
+      </div>
+      <div class="side-card" id="supportCenterCard">
+        <h3>🎧 مرکز پشتیبانی</h3>
+        <p class="dim tiny">هر مشکل، سوال یا پیشنهادی داری اینجا بفرست؛ تیم پشتیبانی سریع بررسی می‌کند.</p>
+        <div class="support-status" id="supportOnlineStatus"><span class="dot"></span><span>در حال بررسی وضعیت پشتیبانی…</span></div>
+        <form id="bugReportForm">
+          <input id="ticketSubject" class="ticket-field" type="text" maxlength="80" placeholder="موضوع کوتاه (مثلاً: باگ در بازی مار)">
+          <div class="option-row" style="margin-bottom:8px;">
+            <select id="ticketCategory" class="ticket-field opt-btn" style="flex:1;">
+              <option value="bug">🐞 باگ فنی</option>
+              <option value="account">👤 حساب کاربری</option>
+              <option value="payment">💳 مالی / اشتراک</option>
+              <option value="suggestion">💡 پیشنهاد</option>
+              <option value="other">❓ سایر موارد</option>
+            </select>
+            <select id="ticketPriority" class="ticket-field opt-btn" style="flex:1;">
+              <option value="low">اولویت کم</option>
+              <option value="medium" selected>اولویت متوسط</option>
+              <option value="high">فوری 🔴</option>
+            </select>
+          </div>
+          <textarea id="bugReportText" rows="3" placeholder="مشکل یا درخواستت رو با جزئیات توضیح بده..." class="ticket-field"></textarea>
+          <button type="submit" class="btn-accent full" style="margin-top:2px;">ارسال تیکت پشتیبانی</button>
+        </form>
+        <h4 style="margin:16px 0 8px;font-size:13px;">📋 تیکت‌های من</h4>
+        <div id="myTicketsList" class="manage-list"></div>
+        <h4 style="margin:16px 0 8px;font-size:13px;">❓ سوالات متداول</h4>
+        <input id="faqSearchInput" class="ticket-field faq-search" type="text" placeholder="در سوالات متداول جستجو کن...">
+        <div id="faqAccordion"></div>
+      </div>
+      <div class="side-card">
+        <h3>پیشنهاد خبر</h3>
+        <p class="dim tiny">خبری از گیم شنیدی؟ پیشنهاد بده — بعد از تأیید مالک/ادمین منتشر می‌شود.</p>
+        <form id="suggestNewsForm">
+          <input id="suggestNewsTitle" type="text" placeholder="عنوان خبر پیشنهادی" style="width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px;font-family:var(--font-body);margin-bottom:8px;">
+          <textarea id="suggestNewsBody" rows="3" placeholder="متن یا توضیح خبر..." style="width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px;font-family:var(--font-body);"></textarea>
+          <button type="submit" class="btn-ghost full" style="margin-top:8px;">ارسال پیشنهاد</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHAT (between users) VIEW -->
+  <section id="view-chat" class="view">
+    <h2 class="view-title" data-i18n="chat">چت کاربران</h2>
+    <div id="chatAuthGate" class="auth-gate">
+      <p>برای چت با دیگران باید ثبت‌نام کنی.</p>
+      <button class="btn-accent" data-open-auth="signup" data-i18n="signupLogin">ثبت‌نام / ورود</button>
+    </div>
+    <div id="chatUserArea" class="chat-user-area hidden">
+      <div id="supportEntry"></div>
+      <input id="userSearchInput" type="text" placeholder="اسم عضو را جستجو کن...">
+      <div id="userSearchResults" class="manage-list"></div>
+      <div id="dmThread" class="chat-window hidden"></div>
+      <form id="dmSendForm" class="chat-form hidden">
+        <input id="dmSendInput" type="text" placeholder="پیام...">
+        <button type="submit" class="btn-accent">ارسال</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- EXPLORE VIEW -->
+  <section id="view-explore" class="view">
+    <div class="explore-head">
+      <h2 class="view-title" data-i18n="explore">اکسپلور</h2>
+      <button id="exploreRefresh" class="btn-ghost">تازه‌سازی</button>
+    </div>
+    <div class="side-card" style="margin-bottom:14px;">
+      <h3>پست خودت رو بذار</h3>
+      <div id="explorePostGate" class="auth-gate" style="padding:8px;">
+        <p class="dim tiny">برای پست‌گذاری باید ثبت‌نام کنی.</p>
+        <button class="btn-ghost" data-open-auth="signup">ثبت‌نام / ورود</button>
+      </div>
+      <form id="createExplorePostForm" class="hidden">
+        <textarea id="explorePostText" rows="2" placeholder="یه میم، عکس یا حرف باحال درباره گیم بنویس..." style="width:100%;background:var(--bg-alt);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px;font-family:var(--font-body);"></textarea>
+        <button type="submit" class="btn-accent" style="margin-top:8px;">انتشار در اکسپلور</button>
+      </form>
+    </div>
+    <div class="tagfilter" id="exploreFilter">
+      <button class="tag active" data-etype="all">همه</button>
+      <button class="tag" data-etype="news">خبر</button>
+      <button class="tag" data-etype="meme">میم</button>
+      <button class="tag" data-etype="video">ویدیو</button>
+      <button class="tag" data-etype="user">پست کاربرا</button>
+    </div>
+    <div id="exploreGrid" class="explore-grid"></div>
+  </section>
+
+  <!-- SHORTS VIEW -->
+  <section id="view-shorts" class="view">
+    <div class="explore-head">
+      <h2 class="view-title">شورتس گیم 🎬</h2>
+      <button id="shortsAddBtn" class="btn-ghost">پست تازه از گیم‌بات</button>
+    </div>
+    <p class="dim tiny">گیم‌بات هر ۵ دقیقه یک ویدیوی تازه اضافه می‌کند؛ ویدیوها از تریلرهای رسمی یوتیوب داخل سایت پخش می‌شوند.</p>
+    <div id="shortsFeed" class="shorts-feed"></div>
+  </section>
+
+  <!-- PROFILE VIEW -->
+  <section id="view-profile" class="view">
+    <h2 class="view-title" data-i18n="profile">پروفایل</h2>
+    <div id="profileLoggedOut" class="auth-gate">
+      <p>برای دیدن پروفایل ابتدا ثبت‌نام یا ورود کن.</p>
+      <button class="btn-accent" data-open-auth="signup" data-i18n="signupLogin">ثبت‌نام / ورود</button>
+    </div>
+    <div id="profileLoggedIn" class="hidden">
+      <div class="profile-card">
+        <label class="avatar" id="profileAvatar" for="avatarUpload" style="cursor:pointer;background-size:cover;background-position:center;"></label>
+        <input type="file" id="avatarUpload" accept="image/*" class="hidden">
+        <div>
+          <h3 id="profileName"></h3>
+          <p class="dim" id="profileHandle"></p>
+          <p class="dim tiny" id="profileJoined"></p>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-box"><b id="profStatComments">0</b><span>دیدگاه</span></div>
+        <div class="stat-box"><b id="profStatSaved">0</b><span>ذخیره‌شده</span></div>
+        <div class="stat-box"><b id="profStatLikes">0</b><span>لایک داده‌شده</span></div>
+        <div class="stat-box"><b id="profStatBadge">—</b><span>وضعیت</span></div>
+      </div>
+
+      <div class="side-card">
+        <h3>ویرایش پروفایل</h3>
+        <form id="editProfileForm">
+          <input id="editProfileName" type="text" placeholder="نام نمایشی">
+          <textarea id="editProfileBio" rows="2" placeholder="بیوگرافی کوتاه (اختیاری)"></textarea>
+          <button type="submit" class="btn-accent full">ذخیره تغییرات</button>
+        </form>
+      </div>
+
+      <h3>خبرهای ذخیره‌شده</h3>
+      <div id="savedList" class="news-feed"></div>
+
+      <h3>دیدگاه‌های من</h3>
+      <div id="myCommentsList" class="manage-list"></div>
+
+      <button id="profileLogoutBtn" class="btn-ghost full" data-i18n="logout">خروج از حساب</button>
+    </div>
+  </section>
+
+  <!-- ABOUT US VIEW -->
+  <section id="view-aboutus" class="view">
+    <h2 class="view-title">درباره ما</h2>
+    <div class="article-body">
+      <p id="aboutUsContent" class="dim">در حال بارگذاری...</p>
+    </div>
+    <h3 style="margin-top:18px;">پیام‌های مالک و ادمین‌ها</h3>
+    <div id="aboutUsMsgsPublic" class="manage-list"></div>
+  </section>
+
+</main>
+
+<!-- Bottom nav -->
+<nav class="bottomnav" aria-label="منوی موبایل">
+  <button class="bnav active" data-view="home"><span>🏠</span><span data-i18n="home">خانه</span></button>
+  <button class="bnav" data-view="explore"><span>🧭</span><span data-i18n="explore">اکسپلور</span></button>
+  <button class="bnav" data-view="shorts"><span>🎬</span><span data-i18n="shorts">شورتس</span></button>
+  <button class="bnav" data-view="games"><span>🎮</span><span data-i18n="games">بازی</span></button>
+  <button class="bnav" data-view="chat"><span>💬</span><span data-i18n="chat">چت</span></button>
+  <button class="bnav" data-view="ai"><span>🤖</span><span>هوش مصنوعی</span></button>
+  <button class="bnav" data-view="profile"><span>👤</span><span data-i18n="profile">پروفایل</span></button>
+  <button class="bnav" data-view="settings"><span>⚙️</span><span data-i18n="settings">تنظیمات</span></button>
+</nav>
+
+<!-- Auth modal -->
+<div id="authModal" class="modal hidden">
+  <div class="modal-box">
+    <button class="modal-close" id="authClose">✕</button>
+    <h3>ثبت‌نام / ورود</h3>
+    <form id="authForm">
+      <input id="authName" type="text" placeholder="نام نمایشی (برای مالک: Parham savar)" required>
+      <input id="authContact" type="text" placeholder="ایمیل یا شماره موبایل" required>
+      <input id="authInvite" type="text" placeholder="کد دعوت (در صورت نیاز)" class="hidden">
+      <div class="captcha-row">
+        <label><input type="checkbox" id="captchaCheck"> من ربات نیستم</label>
+        <div class="captcha-math">
+          <span id="captchaQ"></span>
+          <input id="captchaA" type="number" placeholder="؟" style="width:70px">
+        </div>
+      </div>
+      <button type="submit" class="btn-accent full">ثبت‌نام / ورود</button>
+      <p id="authMsg" class="msg"></p>
+    </form>
+  </div>
+</div>
+
+<!-- Maintenance overlay -->
+<div id="maintenanceOverlay" class="modal hidden">
+  <div class="modal-box" style="text-align:center">
+    <span class="crown" style="font-size:38px">♛</span>
+    <h3>سایت در حال تعمیر است</h3>
+    <p class="dim">به‌زودی برمی‌گردیم. مالک سایت در حال به‌روزرسانی است.</p>
+  </div>
+</div>
+
+<!-- Command Palette -->
+<button id="paletteBtn" class="palette-fab" title="جستجوی سریع (Ctrl+K)">🔍</button>
+<div id="paletteModal" class="modal hidden">
+  <div class="modal-box palette-box">
+    <input id="paletteInput" type="text" placeholder="جستجو یا رفتن به... (مثلاً «بازی‌ها»، اسم خبر، «تنظیمات»)" autocomplete="off">
+    <div id="paletteResults" class="manage-list palette-results"></div>
+    <p class="dim tiny" style="margin-top:8px;">Esc برای بستن — Ctrl+K یا ⌘K هر جای سایت این پنجره رو باز می‌کنه</p>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast hidden"></div>
+<div id="cursorGlow" class="cursor-glow hidden"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>

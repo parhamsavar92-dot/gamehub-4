@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: gamehub
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: OWNER_USERNAME
+        value: parham-savar
+      - key: OWNER_PASSWORD
+        generateValue: true
+      - key: DATA_DIR
+        value: /opt/render/project/src/data

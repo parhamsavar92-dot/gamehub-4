@@ -185,7 +185,7 @@ app.get('/api/live', (req,res)=>{
   req.on('close', ()=>{ clearInterval(ping); sseClients.delete(res); });
 });
 app.get('/*splat',(req,res)=>res.sendFile(path.join(ROOT,'index.html')));
-app.get('*',(req,res)=>res.sendFile(path.join(ROOT,'index.html')));
+
 const port=Number(process.env.PORT||3000);
 app.listen(port,()=>console.log(`GameHub server listening on http://localhost:${port}`));
 
